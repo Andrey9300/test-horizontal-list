@@ -19,9 +19,7 @@ export const contentSlice = createAppSlice({
     loadContentAsync: create.asyncThunk(
       async () => {
         const response = await fetchContent()
-        return response.collection.map((item) => (
-          { id: item.id, title: item.title, images: { artwork_portrait: item.images.artwork_portrait } }
-        ))
+        return response.collection
       },
       {
         pending: (state) => {

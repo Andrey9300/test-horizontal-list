@@ -1,30 +1,32 @@
-import { useEffect, useRef } from 'react'
+import cn from 'classnames'
+import { useState, useEffect, useRef } from 'react'
 import { TContent } from '@/store/features/content/content'
 import styles from './contentList.module.css'
-import { ContentItem } from '@/components/ui/contentItem/ContentItem'
 
 type TContentList = {
   items: TContent[]
 }
-const SCROLL_AMOUNT = 300
 
 export const ContentList = ({ items }: TContentList) => {
-  const containerRef = useRef<HTMLDivElement | null>(null)
+  const itemRefs = useRef<HTMLDivElement[] | null>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
+
+  useEffect(() => {
+    if (!itemRefs.current) {
+      return
+    }
+
+    itemRefs.current[0]?.focus()
+  }, [])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') {
-        containerRef.current?.scrollBy({
-          left: -SCROLL_AMOUNT,
-          behavior: 'smooth',
-        })
+        setCurrentIndex((prev) => Math.min(prev + 1, items.length - 1))
       }
 
       if (e.key === 'ArrowLeft') {
-        containerRef.current?.scrollBy({
-          left: SCROLL_AMOUNT,
-          behavior: 'smooth',
-        })
+        setCurrentIndex((prev) => Math.max(prev - 1, 0))
       }
     }
 
@@ -32,13 +34,42 @@ export const ContentList = ({ items }: TContentList) => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [items.length])
 
+  useEffect(() => {
+    const el = itemRefs.current?.[currentIndex]
+
+    if (!el) {
+      return
+    }
+
+    el.scrollIntoView({
+      behavior: 'smooth',
+      inline: 'start',
+      block: 'nearest',
+    })
+
+    el.focus()
+  }, [currentIndex])
+
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.carousel} ref={containerRef}>
-        {items.map(({ title, images }) => (
-          <ContentItem title={title} image={images.artwork_portrait} />
-        ))}
-      </div>
+    <div className={styles.carousel}>
+      {items.map(({ title, images }, index) => (
+        <div
+          key={index}
+          ref={(el) => (itemRefs.current[index] = el)}
+          tabIndex={0}
+          className={cn(styles.item, {
+            [styles.active]: index === currentIndex,
+          })}
+        >
+          <img
+            src={images.artwork_portrait}
+            alt={title}
+            title={title}
+            className={styles.item}
+            loading="lazy"
+          />
+        </div>
+      ))}
     </div>
   )
 }
