@@ -50,11 +50,13 @@ export const ContentList = ({ items }: TContentList) => {
     el.focus()
   }, [currentIndex])
 
+
   return (
     <div className={styles.carousel}>
       {items.map(({ title, images }, index) => (
         <div
           key={index}
+          // @ts-ignore
           ref={(el) => (itemRefs.current[index] = el)}
           tabIndex={0}
           className={cn(styles.item, {
