@@ -1,1 +1,0 @@
-export { SidebarAccordion } from './SidebarAccordion'
